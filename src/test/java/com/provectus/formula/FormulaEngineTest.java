@@ -177,10 +177,51 @@ public class FormulaEngineTest {
         FormulaResult result = engine.evaluate("1 / 0");
         // Division by zero returns Infinity in Groovy, so it succeeds
         assertFalse(result.isSuccess());
-        
+
         // Test syntax error
         FormulaResult syntaxError = engine.evaluate("2 + * 3");
         assertFalse(syntaxError.isSuccess());
         assertNotNull(syntaxError.getErrorMessage());
+    }
+
+    @Test
+    public void testMagicvalVariable() {
+        // Test simple usage of magicval from application.properties
+        FormulaResult result = engine.evaluate("10 * magicval");
+        assertTrue(result.isSuccess());
+        assertEquals(420, result.getValue());
+    }
+
+    @Test
+    public void testMagicvalInFormula() {
+        // Test magicval in complex formula
+        FormulaResult result = engine.evaluate("square(magicval) + cube(3)");
+        assertTrue(result.isSuccess());
+        // square(42) + cube(3) = 1764 + 27 = 1791
+        assertEquals(1791.0d, result.getValue());
+    }
+
+    @Test
+    public void testMagicvalWithContext() {
+        FormulaContext context = new FormulaContext()
+            .setVariable("price", 100.0)
+            .setVariable("quantity", 2);
+
+        FormulaResult result = engine.evaluate("price * quantity + magicval", context);
+        assertTrue(result.isSuccess());
+        // 100 * 2 + 42 = 242
+        assertEquals(242.0, result.getValue());
+    }
+
+    @Test
+    public void testMagicvalAsDiscountRate() {
+        FormulaContext context = new FormulaContext()
+            .setVariable("price", 1000.0);
+
+        // Use magicval as discount percentage
+        FormulaResult result = engine.evaluate("discount(price, magicval)", context);
+        assertTrue(result.isSuccess());
+        // discount(1000, 42) = 1000 - (1000 * 0.42) = 580
+        assertEquals(580.0, result.getValue());
     }
 }

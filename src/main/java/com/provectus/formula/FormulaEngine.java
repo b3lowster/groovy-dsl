@@ -8,6 +8,7 @@ import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import com.provectus.formula.service.CurrencyService;
 
@@ -18,6 +19,9 @@ public class FormulaEngine {
     private final GroovyShell shell;
     private final CompilerConfiguration config;
     private final CurrencyService currencyService;
+
+    @Value("${magicval}")
+    private Integer magicval;
 
     public FormulaEngine(CurrencyService currencyService) {
         this.currencyService = currencyService;
@@ -40,6 +44,9 @@ public class FormulaEngine {
 
             // Add CurrencyService to the binding
             binding.setVariable("currencyService", currencyService);
+
+            // Add magicval to the binding
+            binding.setVariable("magicval", magicval);
 
             // Add all context variables to the binding
             for (Map.Entry<String, Object> entry : context.getVariables().entrySet()) {
@@ -72,6 +79,9 @@ public class FormulaEngine {
 
             // Add CurrencyService to the binding
             binding.setVariable("currencyService", currencyService);
+
+            // Add magicval to the binding
+            binding.setVariable("magicval", magicval);
 
             for (Map.Entry<String, Object> entry : context.getVariables().entrySet()) {
                 binding.setVariable(entry.getKey(), entry.getValue());
