@@ -4,17 +4,19 @@
 package com.provectus.formula;
 
 import groovy.lang.Script;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 import static org.junit.Assert.*;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest
 public class FormulaEngineTest {
+
+    @Autowired
     private FormulaEngine engine;
-    
-    @Before
-    public void setUp() {
-        engine = new FormulaEngine();
-    }
     
     @Test
     public void testStringFunctions() {

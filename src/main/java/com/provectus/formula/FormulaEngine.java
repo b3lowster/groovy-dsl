@@ -8,14 +8,19 @@ import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
+import org.springframework.stereotype.Component;
+import com.provectus.formula.service.CurrencyService;
 
 import java.util.Map;
 
+@Component
 public class FormulaEngine {
     private final GroovyShell shell;
     private final CompilerConfiguration config;
+    private final CurrencyService currencyService;
 
-    public FormulaEngine() {
+    public FormulaEngine(CurrencyService currencyService) {
+        this.currencyService = currencyService;
         config = new CompilerConfiguration();
         
         // Add automatic imports
@@ -32,6 +37,9 @@ public class FormulaEngine {
     public FormulaResult evaluate(String formula, FormulaContext context) {
         try {
             Binding binding = new Binding();
+
+            // Add CurrencyService to the binding
+            binding.setVariable("currencyService", currencyService);
 
             // Add all context variables to the binding
             for (Map.Entry<String, Object> entry : context.getVariables().entrySet()) {
@@ -61,14 +69,17 @@ public class FormulaEngine {
     public FormulaResult evaluateCompiled(Script script, FormulaContext context) {
         try {
             Binding binding = new Binding();
-            
+
+            // Add CurrencyService to the binding
+            binding.setVariable("currencyService", currencyService);
+
             for (Map.Entry<String, Object> entry : context.getVariables().entrySet()) {
                 binding.setVariable(entry.getKey(), entry.getValue());
             }
-            
+
             script.setBinding(binding);
             Object result = script.run();
-            
+
             return FormulaResult.success(result);
         } catch (Exception e) {
             return FormulaResult.error(e.getMessage());

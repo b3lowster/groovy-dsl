@@ -18,11 +18,6 @@ public class FormulaEngineApplication {
     }
 
     @Bean
-    public FormulaEngine formulaEngine() {
-        return new FormulaEngine();
-    }
-
-    @Bean
     public CommandLineRunner commandLineRunner(FormulaEngine engine, CurrencyService currencyService) {
         return args -> {
             // Initialize CurrencyFunctions with the Spring-managed CurrencyService
