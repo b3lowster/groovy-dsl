@@ -33,6 +33,8 @@ public class FormulaEngine {
         imports.addStaticStars("com.provectus.formula.functions.MathFunctions");
         imports.addStaticStars("com.provectus.formula.functions.StringFunctions");
         imports.addStaticStars("com.provectus.formula.functions.CurrencyFunctions");
+        imports.addStaticStars("org.apache.commons.lang3.StringUtils");
+        imports.addStarImports("java.util.stream");
         config.addCompilationCustomizers(imports);
         
         this.shell = new GroovyShell(config);

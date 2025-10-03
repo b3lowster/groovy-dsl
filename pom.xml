@@ -47,6 +47,12 @@
             <version>${groovy.version}</version>
         </dependency>
 
+        <!-- Apache Commons Lang for StringUtils -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

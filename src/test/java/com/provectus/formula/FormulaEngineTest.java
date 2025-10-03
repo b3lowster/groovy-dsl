@@ -224,4 +224,150 @@ public class FormulaEngineTest {
         // discount(1000, 42) = 1000 - (1000 * 0.42) = 580
         assertEquals(580.0, result.getValue());
     }
+
+    @Test
+    public void testStringUtilsCapitalize() {
+        FormulaContext context = new FormulaContext()
+            .setVariable("text", "hello world");
+
+        FormulaResult result = engine.evaluate("capitalize(text)", context);
+        assertTrue(result.isSuccess());
+        assertEquals("Hello world", result.getValue());
+    }
+
+    @Test
+    public void testStringUtilsReverse() {
+        FormulaResult result = engine.evaluate("reverse('hello')");
+        assertTrue(result.isSuccess());
+        assertEquals("olleh", result.getValue());
+    }
+
+    @Test
+    public void testStringUtilsIsBlank() {
+        FormulaContext context = new FormulaContext()
+            .setVariable("empty", "")
+            .setVariable("whitespace", "   ")
+            .setVariable("text", "hello");
+
+        FormulaResult emptyResult = engine.evaluate("isBlank(empty)", context);
+        assertTrue(emptyResult.isSuccess());
+        assertEquals(true, emptyResult.getValue());
+
+        FormulaResult whitespaceResult = engine.evaluate("isBlank(whitespace)", context);
+        assertTrue(whitespaceResult.isSuccess());
+        assertEquals(true, whitespaceResult.getValue());
+
+        FormulaResult textResult = engine.evaluate("isBlank(text)", context);
+        assertTrue(textResult.isSuccess());
+        assertEquals(false, textResult.getValue());
+    }
+
+    @Test
+    public void testGroovyCollectionsApi() {
+        String formula = """
+            def numbers = [1, 2, 3, 4, 5]
+            numbers.findAll { it > 2 }.sum()
+        """;
+
+        FormulaResult result = engine.evaluate(formula);
+        assertTrue(result.isSuccess());
+        assertEquals(12, result.getValue());
+    }
+
+    @Test
+    public void testStreamApiWithFilter() {
+        String formula = """
+            [1, 2, 3, 4, 5].stream()
+                .filter { it > 2 }
+                .mapToInt { it }
+                .sum()
+        """;
+
+        FormulaResult result = engine.evaluate(formula);
+        assertTrue(result.isSuccess());
+        assertEquals(12, result.getValue());
+    }
+
+    @Test
+    public void testParallelStreamSum() {
+        String formula = """
+            [1, 2, 3, 4, 5].parallelStream()
+                .filter { it > 2 }
+                .mapToInt { it }
+                .sum()
+        """;
+
+        FormulaResult result = engine.evaluate(formula);
+        assertTrue(result.isSuccess());
+        assertEquals(12, result.getValue());
+    }
+
+    @Test
+    public void testParallelStreamWithCollectors() {
+        String formula = """
+            [1, 2, 3, 4, 5].parallelStream()
+                .map { it * 2 }
+                .collect(Collectors.toList())
+        """;
+
+        FormulaResult result = engine.evaluate(formula);
+        assertTrue(result.isSuccess());
+        assertEquals(java.util.Arrays.asList(2, 4, 6, 8, 10), result.getValue());
+    }
+
+    @Test
+    public void testParallelStreamReduce() {
+        String formula = """
+            [1, 2, 3, 4, 5].parallelStream()
+                .reduce(0, { a, b -> a + b })
+        """;
+
+        FormulaResult result = engine.evaluate(formula);
+        assertTrue(result.isSuccess());
+        assertEquals(15, result.getValue());
+    }
+
+    @Test
+    public void testParallelStreamCount() {
+        String formula = """
+            [1, 2, 3, 4, 5, 6].parallelStream()
+                .filter { it % 2 == 0 }
+                .count()
+        """;
+
+        FormulaResult result = engine.evaluate(formula);
+        assertTrue(result.isSuccess());
+        assertEquals(3L, result.getValue());
+    }
+
+    @Test
+    public void testParallelStreamWithStrings() {
+        String formula = """
+            ['hello', 'world', 'groovy'].parallelStream()
+                .map { it.toUpperCase() }
+                .collect(Collectors.joining(', '))
+        """;
+
+        FormulaResult result = engine.evaluate(formula);
+        assertTrue(result.isSuccess());
+        assertEquals("HELLO, WORLD, GROOVY", result.getValue());
+    }
+
+    @Test
+    public void testStreamApiWithContext() {
+        FormulaContext context = new FormulaContext()
+            .setVariable("threshold", 10);
+
+        String formula = """
+            [5, 10, 15, 20, 25].parallelStream()
+                .filter { it > threshold }
+                .mapToInt { it }
+                .average()
+                .orElse(0)
+        """;
+
+        FormulaResult result = engine.evaluate(formula, context);
+        assertTrue(result.isSuccess());
+        assertEquals(20.0, (Double) result.getValue(), 0.01);
+    }
 }
